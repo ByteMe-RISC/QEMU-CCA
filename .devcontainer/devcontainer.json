@@ -1,0 +1,22 @@
+{
+  "name": "QEMU CCA Devcontainer",
+  "image": "fedora:latest",
+  "onCreateCommand": "dnf upgrade -y && dnf install which git gh gcc make binutils binutils-gold -y",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "EditorConfig.EditorConfig",
+        "eamodio.gitlens",
+        "davidanson.vscode-markdownlint"
+      ],
+      "settings": {
+        "editor.renderWhitespace": "boundary",
+        "[jsonc]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "editor.minimap.enabled": false
+      }
+    }
+  }
+}
