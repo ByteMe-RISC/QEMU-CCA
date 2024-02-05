@@ -5,6 +5,7 @@
 ### Fedora
 
 - wget
+- qemu
 - qemu-system-aarch64
 - edk2-aarch64
 
@@ -13,19 +14,7 @@
 ### ISO
 
 ```bash
-wget http://ftp.debian.org/debian/dists/stable/main/installer-arm64/current/images/netboot/mini.iso
-```
-
-### initramfs
-
-```bash
-wget http://ftp.debian.org/debian/dists/stable/main/installer-arm64/current/images/netboot/debian-installer/arm64/initrd.gz
-```
-
-### Linux kernel
-
-```bash
-wget http://ftp.debian.org/debian/dists/stable/main/installer-arm64/current/images/netboot/debian-installer/arm64/linux
+wget https://cdimage.debian.org/debian-cd/current/arm64/iso-cd/debian-12.4.0-arm64-netinst.iso
 ```
 
 ## Disk creation
@@ -34,10 +23,63 @@ wget http://ftp.debian.org/debian/dists/stable/main/installer-arm64/current/imag
 qemu-img create -f qcow2 debian-arm.sda.qcow2 2G
 ```
 
-## QEMU launch
+## UEFI launch
 
 ```bash
-qemu-system-aarch64 -name Debian-qemu-aarch64 -M virt,virtualization=on,secure=on,gic-version=max -cpu max,x-rme=on -accel tcg -smp 2 -m 2G -bios /usr/share/edk2/aarch64/QEMU_EFI.fd -kernel linux -initrd initrd.gz -drive file=mini.iso,format=raw,index=0,media=cdrom,if=virtio -drive file=debian-arm.sda.qcow2,format=qcow2,index=1,media=disk,if=virtio -device virtio-net-device,netdev=net0 -netdev user,id=net0 -nographic
+qemu-system-aarch64 \
+    -machine virt \
+    -accel tcg \
+    -cpu max \
+    -smp 4 \
+    -m 8G \
+    -drive file=/usr/share/AAVMF/AAVMF_CODE.fd,if=pflash,format=raw,readonly=on \
+    -drive file=qemu-aarch64-efivars,if=pflash,format=raw \
+    -serial mon:stdio \
+    -display none \
+    -nographic \
+    -no-reboot
+```
+
+## Debian install launch
+
+```bash
+qemu-system-aarch64 \
+    -machine virt \
+    -accel tcg \
+    -cpu max \
+    -smp 4 \
+    -m 8G \
+    -drive file=/usr/share/AAVMF/AAVMF_CODE.fd,if=pflash,format=raw,readonly=on \
+    -drive file=qemu-aarch64-efivars,if=pflash,format=raw \
+    -device virtio-scsi-pci \
+    -device scsi-cd,drive=cdrom,bootindex=0 \
+    -drive file=debian-12.4.0-arm64-netinst.iso,if=none,format=raw,readonly=on,media=cdrom,id=cdrom \
+    -device virtio-blk,drive=hda,bootindex=1\
+    -drive file=debian-aarch64.qcow2,if=none,format=qcow2,media=disk,id=hda \
+    -nic user,hostfwd=tcp::2222-:22,model=virtio \
+    -nographic \
+    -no-reboot
+```
+
+## Debian launch
+
+```bash
+qemu-system-aarch64 \
+    -machine virt \
+    -accel tcg \
+    -cpu max \
+    -smp 4 \
+    -m 8G \
+    -drive file=/usr/share/AAVMF/AAVMF_CODE.fd,if=pflash,format=raw,readonly=on \
+    -drive file=qemu-aarch64-efivars,if=pflash,format=raw \
+    -device virtio-scsi-pci \
+    -device virtio-blk,drive=hda,bootindex=1\
+    -drive file=debian-aarch64.qcow2,if=none,format=qcow2,media=disk,id=hda \
+    -nic user,hostfwd=tcp::2222-:22,model=virtio \
+    -serial mon:stdio \
+    -display none \
+    -nographic \
+    -no-reboot
 ```
 
 ### UEFI

@@ -1,7 +1,7 @@
 {
   "name": "QEMU CCA Devcontainer",
   "image": "fedora:latest",
-  "onCreateCommand": "dnf upgrade -y && dnf install which wget git gh gcc make binutils binutils-gold qemu-system-aarch64 -y",
+  "onCreateCommand": "dnf upgrade -y && dnf install which wget git gh gcc make binutils binutils-gold qemu qemu-system-aarch64 edk2-aarch64 -y",
   "customizations": {
     "vscode": {
       "extensions": [
